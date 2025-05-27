@@ -37,11 +37,10 @@ project/
 
 ├── templates/
 
-│   ├── index.html         # Chat page
+   ├── index.html         # Chat page
 
-│   └── start.html         # Welcome/start page
+   └── start.html         # Welcome/start page
 
-└── static/                # (Optional for CSS/JS if externalized)
 
 
 
