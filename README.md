@@ -16,12 +16,16 @@
 
 ## Device-1
 
-![WhatsApp Image 2025-05-27 at 16 33 49_054b0801](https://github.com/user-attachments/assets/f42e5641-3b86-4029-9a5c-b746d8d74d1e)
+<p align="center">
+  <img src="Images/Desktop-1.jpg" alt="Centered Image" width="1300" />
+</p>
 
 
 ## Device-2
 
-![WhatsApp Image 2025-05-27 at 17 41 01_2047cb04](https://github.com/user-attachments/assets/fbb338fc-93d5-47cc-9bf3-2aed2faf8931)
+<p align="center">
+  <img src="Images/Mobile-1.jpg" alt="Centered Image" width="400" />
+</p>
 
 
 
@@ -61,10 +65,13 @@ python app.py
 
 ## Sample Images
 
-![WhatsApp Image 2025-05-27 at 16 39 56_d0696898](https://github.com/user-attachments/assets/97d33570-0f0e-4766-bf0c-6b68c8386c99)
+<p align="center">
+  <img src="Images/Desktop-2.jpg" alt="Centered Image" width="1300" />
+</p>
 
-![WhatsApp Image 2025-05-27 at 17 41 38_d3d171c9](https://github.com/user-attachments/assets/5b9adae6-34d8-49f4-8632-3cc1fff16d4e)
-
+<p align="center">
+  <img src="Images/Mobile-2.jpg" alt="Centered Image" width="400" />
+</p>
 
 
 ## 🧪 Future Improvements
