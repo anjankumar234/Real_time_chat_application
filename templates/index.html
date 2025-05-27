@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat Application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        #canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+        }
+        #chat {
+            position: relative;
+            max-width: 500px;
+            margin: 50px auto;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            overflow-y: scroll;
+            max-height: 400px;
+            display: flex;
+            flex-direction: column;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            word-wrap: break-word;
+            max-width: 70%;
+        }
+        .sender {
+            background-color: #007bff;
+            color: #fff;
+            align-self: flex-end;
+        }
+        .receiver {
+            background-color: #f0f0f0;
+            color: #333;
+            align-self: flex-start;
+        }
+        #message_input {
+            width: calc(50% - 70px);
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 16px;
+        }
+        #send {
+            width: 60px;
+            padding: 10px;
+            border: none;
+            border-radius: 3px;
+            background-color: #007bff;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #take-photo {
+            width: 120px;
+            padding: 10px;
+            border: none;
+            border-radius: 3px;
+            background-color: #4CAF50;
+            color: #fff;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="canvas-container"></div>
+    <center>
+        <h1>CHAT APPLICATION</h1>
+        <div id="chat"></div>
+        <div id="input_section">
+            <input id="message_input" autocomplete="off" />
+            <button id="send">Send</button>
+            <button id="take-photo">Take Photo</button>
+        </div>
+        <video id="video" width="320" height="240" style="display: none;"></video>
+        <canvas id="canvas" width="320" height="240" style="display: none;"></canvas>
+    </center>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.0/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script>
+        // 3D scene setup
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('canvas-container').appendChild(renderer.domElement);
+
+        // 3D objects
+        const geometry = new THREE.BoxGeometry(2, 2, 2);
+        const material = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+        const cube = new THREE.Mesh(geometry, material);
+        scene.add(cube);
+
+        camera.position.z = 5;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            cube.rotation.x += 0.01;
+            cube.rotation.y += 0.01;
+            renderer.render(scene, camera);
+        }
+
+        animate();
+
+        // Socket.IO code
+        var socket = io();  // Automatically uses the same host and port the page came from
+        socket.on('message', function(msg) {
+            console.log('Received message: ' + msg);
+            appendMessage(msg, 'receiver');
+        });
+
+        socket.on('image', function(data) {
+            console.log('Received image data');
+            appendImage(data, 'receiver');
+        });
+
+        document.getElementById("send").onclick = function() {
+            sendMessage();
+        };
+
+        document.getElementById("message_input").addEventListener("keydown", function(event) {
+            if (event.keyCode === 13) { // Enter key pressed
+                event.preventDefault();
+                sendMessage();
+            }
+        });
+
+        document.getElementById("take-photo").addEventListener('click', async () => {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                const videoElement = document.getElementById('video');
+                const canvasElement = document.getElementById('canvas');
+                videoElement.srcObject = stream;
+                videoElement.play();
+
+                const context = canvasElement.getContext('2d');
+                context.drawImage(videoElement, 0, 0, canvasElement.width, canvasElement.height);
+                const imageData = canvasElement.toDataURL('image/png');
+                socket.emit('image', imageData);
+                appendImage(imageData, 'sender');
+            } catch (error) {
+                console.error('Error accessing camera:', error);
+            }
+        });
+
+        function sendMessage() {
+            var msg = document.getElementById("message_input").value.trim();
+            if (msg !== "") {
+                appendMessage(msg, 'sender');
+                socket.send(msg);
+                document.getElementById("message_input").value = "";
+            }
+        }
+
+        function appendMessage(msg, className) {
+            var chatDiv = document.getElementById("chat");
+            var messageDiv = document.createElement("div");
+            messageDiv.textContent = msg;
+            messageDiv.classList.add("message");
+            messageDiv.classList.add(className);
+
+            // Check if the last message is from the sender and matches the message being sent
+            var lastMessage = chatDiv.lastElementChild;
+            if (lastMessage && lastMessage.classList.contains('sender') && lastMessage.textContent === msg) {
+                // Update the content of the last message instead of appending a new one
+                lastMessage.textContent = msg;
+            } else {
+                // Append a new message
+                chatDiv.appendChild(messageDiv);
+            }
+
+            chatDiv.scrollTop = chatDiv.scrollHeight; // Scroll to bottom after appending message
+        }
+
+        function appendImage(imgData, className) {
+            var chatDiv = document.getElementById("chat");
+            var imageDiv = document.createElement("img");
+            imageDiv.src = imgData;
+            imageDiv.classList.add("message");
+            imageDiv.classList.add(className);
+            imageDiv.style.maxWidth = "70%";
+            chatDiv.appendChild(imageDiv);
+            chatDiv.scrollTop = chatDiv.scrollHeight; // Scroll to bottom after appending image
+        }
+    </script>
+</body>
+</html>
