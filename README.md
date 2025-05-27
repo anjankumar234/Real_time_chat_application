@@ -33,13 +33,13 @@
 
 project/
 
-├── app.py                 # Flask app with Socket.IO
+     ├── app.py                 # Flask app with Socket.IO
 
-├── templates/
+     ├── templates/
 
-   ├── index.html         # Chat page
+       ├── index.html         # Chat page
 
-   └── start.html         # Welcome/start page
+       └── start.html         # Welcome/start page
 
 
 
